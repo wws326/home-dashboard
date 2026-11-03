@@ -77,7 +77,7 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px}
 .small{font-size:12px;color:var(--muted)}
 .line-badge{width:44px;height:44px;border-radius:12px;background:var(--accent);color:var(--bg);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:24px;font-weight:600;flex:none}
 
-main{flex:1;min-height:0;display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:20px}
+main{flex:1;min-height:0;display:grid;grid-template-columns:1.5fr 1fr .9fr;gap:18px}
 .card{background:var(--card);border-radius:22px;padding:20px 22px;display:flex;flex-direction:column;gap:14px;min-height:0;overflow:hidden}
 .card-head{display:flex;justify-content:space-between;align-items:baseline}
 h2,h3{margin:0;font-size:15px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
@@ -86,17 +86,26 @@ h3{font-size:13px}
 
 .day{display:grid;grid-template-columns:56px 1fr;gap:10px;align-items:start;padding:4px 10px;border-radius:9px}
 .day .d{font-size:14px;color:var(--fg2);font-variant-numeric:tabular-nums}
-.day .ev{font-size:14px;color:var(--faint);line-height:1.45}
+.day .ev{font-size:14px;color:var(--faint);line-height:1.45;min-width:0}
+.day .ev .e{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.day .ev{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:8px}
+.day .ev .e{flex:1 1 100%}
+.day:not(.today) .ev{flex-wrap:nowrap}
+.day:not(.today) .ev .e{flex:0 1 auto}
+.more-tag{flex:none;font-size:11px;font-weight:600;color:var(--bg);background:var(--muted);border-radius:999px;padding:1px 7px}
+.day .ev .free{color:var(--faint)}
+.upcoming .u span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.cal-empty{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;border:1px dashed var(--edge);color:var(--fg2);font-size:14px}
 .day .ev b{font-weight:500;color:var(--fg)}
 .day .ev .routine{color:var(--muted)}
 .day.past{opacity:.5}
 .day.today{background:var(--accent-soft);outline:1px solid var(--accent)}
 .day.today .d{color:var(--accent);font-weight:600}
-.upcoming{flex:1;min-height:0;display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--fg2);overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+.upcoming{-webkit-mask-image:linear-gradient(#000 calc(100% - 18px),transparent);mask-image:linear-gradient(#000 calc(100% - 18px),transparent);padding-bottom:14px;flex:1;min-height:84px;display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--fg2);overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
 .upcoming .u{display:grid;grid-template-columns:56px 1fr;gap:10px}
 .upcoming .u span:first-child{color:var(--muted);font-variant-numeric:tabular-nums}
 
-.todo{display:flex;gap:14px;align-items:flex-start;width:100%;min-height:48px;padding:8px 0;border:0;background:none;text-align:left;font-size:16px;line-height:1.4;cursor:pointer;color:var(--fg)}
+.todo{display:flex;gap:14px;align-items:flex-start;width:100%;min-height:44px;padding:6px 0;border:0;background:none;text-align:left;font-size:16px;line-height:1.4;cursor:pointer;color:var(--fg)}
 .todo:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
 .box{width:24px;height:24px;border:1.6px solid var(--accent);border-radius:7px;flex:none;margin-top:0;display:flex;align-items:center;justify-content:center;transition:background .2s}
 .todo[aria-pressed="true"] .box{background:var(--accent)}
@@ -108,11 +117,13 @@ h3{font-size:13px}
 .watch .note{color:var(--muted)}
 .foot{margin-top:auto;font-size:12px;color:var(--faint)}
 
-.news{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:16px}
-.news li{display:grid;grid-template-columns:28px 1fr;gap:10px}
-.news .n{font-family:var(--display);font-size:22px;color:var(--accent);line-height:1.1}
-.news .t{font-size:16px;font-weight:600;line-height:1.3}
-.news .s{font-size:13px;color:var(--muted);line-height:1.45;margin-top:4px}
+.news{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;flex:1;min-height:0;overflow:hidden}
+.news li{display:grid;grid-template-columns:20px 1fr;gap:8px}
+.news .n{font-family:var(--display);font-size:16px;color:var(--accent);line-height:1.3}
+.news .t{font-size:15px;font-weight:600;line-height:1.3}
+.news .s{font-size:12.5px;color:var(--muted);line-height:1.4;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.readmore{display:flex;align-items:center;gap:6px;min-height:44px;font-size:13px;font-weight:500;color:var(--accent);text-decoration:none;margin-top:auto}
+.readmore:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
 
 .forecast{flex:none;background:var(--card);border-radius:22px;padding:14px 24px;display:grid;grid-template-columns:120px repeat(7,minmax(0,1fr));gap:8px;align-items:center}
 .fd{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0;border-radius:14px}
@@ -209,7 +220,7 @@ h3{font-size:13px}
   <main>
     <section class="card" aria-labelledby="h-week">
       <div class="card-head"><h2 id="h-week">This week</h2><div class="small" id="weekRange"></div></div>
-      <div id="week" style="display:flex;flex-direction:column;gap:2px"><div class="empty">Calendar loads after unlock.</div></div>
+      <div id="week" style="display:flex;flex-direction:column;gap:1px;flex:none"><div class="empty">Calendar loads after unlock.</div></div>
       <div class="rule"></div>
       <h3>Coming up · next 4 weeks</h3>
       <div class="upcoming" id="upcoming"></div>
@@ -217,16 +228,17 @@ h3{font-size:13px}
 
     <section class="card" aria-labelledby="h-todo">
       <div class="card-head"><h2 id="h-todo">To-do</h2><div class="small" id="todoCount"></div></div>
-      <div id="todos"></div>
+      <div id="todos" style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch"></div>
       <div class="rule"></div>
       <h3>Watching</h3>
-      <div id="watching" style="display:flex;flex-direction:column;gap:12px"></div>
+      <div id="watching" style="display:flex;flex-direction:column;gap:10px;flex:none"></div>
       <div class="foot" id="dataAge"></div>
     </section>
 
     <section class="card" aria-labelledby="h-news">
       <div class="card-head"><h2 id="h-news">Top 3 news</h2><div class="small">via 1440</div></div>
       <ol class="news" id="news"></ol>
+      <a class="readmore" href="https://join1440.com/today" target="_blank" rel="noopener">Read the full digest on 1440 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
     </section>
   </main>
 
@@ -397,45 +409,52 @@ async function loadWeather(){
     if (w) renderWeather(w, true); else $("wxAdvice").textContent = "Weather unavailable";
   }
 }
+let dayRain = () => 0;
 function renderWeather(w, stale){
   const [k, label] = wxKind(w.current.weather_code);
   $("wxIcon").innerHTML = icon(k, 44);
   $("wxNow").textContent = Math.round(w.current.temperature_2m) + "°";
   $("wxHL").textContent = "H " + Math.round(w.daily.temperature_2m_max[0]) + "° L " + Math.round(w.daily.temperature_2m_min[0]) + "°";
 
-  // Tomorrow's commute, compared with today
-  const pick = (dayIdx) => {
-    const date = w.daily.time[dayIdx];
-    let rain = 0, rainAt = "";
-    w.hourly.time.forEach((t, i) => {
-      if (!t.startsWith(date)) return;
+  // The coming day: today before 05:00, tomorrow after. Rain is judged on waking hours
+  // (06-22) for the advice and the strip alike; the commute window refines the wording.
+  const D = w.daily, H = w.hourly;
+  const T = new Date().getHours() < 5 ? 0 : 1, N = 0;
+  const word = T === 0 ? "Today" : "Tomorrow";
+  const rainIn = (dayIdx, test) => {
+    let max = 0, at = "";
+    H.time.forEach((t, i) => {
+      if (!t.startsWith(D.time[dayIdx])) return;
       const h = +t.slice(11, 13);
-      if (S.commute.some(([a,b]) => h >= a && h < b)) {
-        const pp = w.hourly.precipitation_probability[i] ?? 0;
-        if (pp > rain) { rain = pp; rainAt = t.slice(11, 16); }
-      }
+      if (!test(h)) return;
+      const pp = H.precipitation_probability[i] ?? 0;
+      if (pp > max) { max = pp; at = t.slice(11, 16); }
     });
-    return { rain, rainAt };
+    return { max, at };
   };
-  const D = w.daily, T = 1, N = 0;
-  const a = pick(T);
-  const wet = a.rain >= S.umbrellaPct;
-  $("wxAdvice").textContent = "Tomorrow: " + (wet ? "take an umbrella" : "no umbrella needed");
+  dayRain = (i) => rainIn(i, h => h >= 6 && h < 22).max;
+  const day = rainIn(T, h => h >= 6 && h < 22);
+  const commute = rainIn(T, h => S.commute.some(([a,b]) => h >= a && h < b));
+  const wet = day.max >= S.umbrellaPct;
+  const commuteWet = commute.max >= S.umbrellaPct;
+  $("wxAdvice").textContent = word + ": " + (wet ? "take an umbrella" : "no umbrella needed");
   $("wxAdvice").style.color = wet ? "var(--rain)" : "var(--accent)";
   const bits = [];
   const [, tLabel] = wxKind(D.weather_code[T]);
-  bits.push(tLabel + ", " + Math.round(D.temperature_2m_max[T]) + "° / " + Math.round(D.temperature_2m_min[T]) + "°");
-  if (wet) bits.push(a.rain + "% chance of rain around " + a.rainAt + ((D.precipitation_sum && D.precipitation_sum[T] >= 1) ? ", about " + Math.round(D.precipitation_sum[T]) + " mm" : ""));
-  else bits.push("dry for your commute");
-  if (D.apparent_temperature_max) {
+  bits.push(tLabel + " " + Math.round(D.temperature_2m_max[T]) + "°/" + Math.round(D.temperature_2m_min[T]) + "°");
+  if (wet) {
+    const mm = (D.precipitation_sum && D.precipitation_sum[T] >= 1) ? " (" + Math.round(D.precipitation_sum[T]) + " mm)" : "";
+    bits.push(day.max + "% rain around " + day.at + mm + (commuteWet ? "" : ", commute mostly dry"));
+  } else bits.push("dry all day");
+  if (T === 1 && D.apparent_temperature_max) {
     const d = Math.round(D.apparent_temperature_max[T] - D.apparent_temperature_max[N]);
-    bits.push(d <= -2 ? "feels " + (-d) + "° colder than today" : d >= 2 ? "feels " + d + "° milder than today" : "feels about the same as today");
+    bits.push(d <= -2 ? "feels " + (-d) + "° colder" : d >= 2 ? "feels " + d + "° milder" : "feels like today");
   }
   if (D.wind_gusts_10m_max) {
     const g1 = Math.round(D.wind_gusts_10m_max[T]), g0 = Math.round(D.wind_gusts_10m_max[N]);
     if (g1 >= 45) bits.push("strong gusts up to " + g1 + " km/h");
-    else if (g1 - g0 >= 10) bits.push("windier, gusts to " + g1 + " km/h");
-    else if (g0 - g1 >= 10) bits.push("calmer than today");
+    else if (T === 1 && g1 - g0 >= 10) bits.push("windier (" + g1 + " km/h gusts)");
+    else if (T === 1 && g0 - g1 >= 10) bits.push("calmer");
   }
   let note = bits.join(" · ") + (stale ? " · last known" : "");
   $("wxNote").textContent = note.charAt(0).toUpperCase() + note.slice(1);
@@ -444,10 +463,10 @@ function renderWeather(w, stale){
   $("fc").innerHTML = w.daily.time.map((d, i) => {
     const dt = new Date(d + "T12:00:00");
     const [kk] = wxKind(w.daily.weather_code[i]);
-    const p = w.daily.precipitation_probability_max[i];
+    const p = dayRain(i);
     return '<div class="fd' + (i === 0 ? " today" : "") + '"><div class="w">' + (i === 0 ? "Today" : DOW[dt.getDay()]) + "</div>" +
       icon(kk, 30) + '<div class="tt">' + Math.round(w.daily.temperature_2m_max[i]) + "° <span>" + Math.round(w.daily.temperature_2m_min[i]) + "°</span></div>" +
-      '<div class="pp">' + (p >= 30 ? p + "% rain" : "") + "</div></div>";
+      '<div class="pp">' + (p >= S.umbrellaPct ? p + "% rain" : "") + "</div></div>";
   }).join("");
 }
 
@@ -610,9 +629,14 @@ function renderData(d, stale){
     const dt = new Date(mon); dt.setDate(mon.getDate() + i);
     const key = ymd(dt);
     const evs = byDay[key] || [];
+    const one = (e) => e.birthday ? '<span class="e bday">' + esc(e.title) + "</span>"
+      : e.routine ? '<span class="e routine">' + esc((e.time ? e.time + " " : "") + e.title) + "</span>"
+      : '<span class="e"><b>' + esc(e.time ? e.time + " " : "") + "</b>" + esc(e.title) + "</span>";
+    const cap = key === today ? 3 : 1;
+    const shown = evs.length > cap ? evs.slice(0, cap) : evs;
     const txt = evs.length
-      ? evs.map(e => e.birthday ? '<span class="bday">' + esc(e.title) + "</span>" : e.routine ? '<span class="routine">' + esc((e.time ? e.time + " " : "") + e.title) + "</span>" : "<b>" + esc(e.time ? e.time + " " : "") + "</b>" + esc(e.title)).join("<br>")
-      : (key === today ? "Nothing scheduled" : "Free");
+      ? shown.map(one).join("") + (evs.length > shown.length ? '<span class="more-tag">+' + (evs.length - shown.length) + "</span>" : "")
+      : '<span class="free">' + (key === today ? "Nothing scheduled" : "Free") + "</span>";
     rows.push('<div class="day' + (key === today ? " today" : key < today ? " past" : "") + '"><div class="d">' + DOW[dt.getDay()] + " " + dt.getDate() + '</div><div class="ev">' + txt + "</div></div>");
   }
   $("week").innerHTML = rows.join("");
@@ -622,7 +646,7 @@ function renderData(d, stale){
   const later = (d.events || []).filter(e => e.date > weekEnd && !e.routine).slice(0, 12);
   $("upcoming").innerHTML = later.length
     ? later.map(e => { const dt = new Date(e.date + "T12:00:00"); return '<div class="u"><span>' + DOW[dt.getDay()] + " " + dt.getDate() + '</span><span' + (e.birthday ? ' class="bday"' : "") + ">" + esc(e.title) + "</span></div>"; }).join("")
-    : '<div class="empty">Nothing booked yet.</div>';
+    : '<div class="cal-empty"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>Nothing else booked for the next 4 weeks</div>';
 
   renderTodos(d.todos || []);
   const eye = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E6B566" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" style="flex:none;margin-top:1px"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
