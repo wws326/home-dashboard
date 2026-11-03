@@ -66,6 +66,12 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px}
 .chips{display:flex;gap:14px}
 .chip{display:flex;align-items:center;gap:16px;padding:14px 20px;border-radius:20px;background:var(--card);min-width:290px}
 #wxNote{max-width:300px;line-height:1.4}
+.bus-night{display:flex;align-items:center;gap:14px}
+.zbus-body{animation:snooze 4s ease-in-out infinite;transform-origin:39px 50px}
+.zbus .z{opacity:0;animation:drift 3.6s ease-in-out infinite}
+.zbus .z2{animation-delay:1.2s}.zbus .z3{animation-delay:2.4s}
+@keyframes snooze{50%{transform:translateY(1.5px) scaleY(.97)}}
+@keyframes drift{0%{opacity:0;transform:translate(0,4px)}30%{opacity:1}100%{opacity:0;transform:translate(6px,-6px)}}
 .big{font-family:var(--display);font-size:34px;font-weight:500;line-height:1;font-variant-numeric:tabular-nums}
 .chip .lead{font-size:15px;font-weight:600}
 .small{font-size:12px;color:var(--muted)}
@@ -169,9 +175,29 @@ h3{font-size:13px}
           <div class="small" id="wxNote"></div>
         </div>
       </div>
-      <div class="chip">
+      <div class="chip" id="busChip">
+        <div class="bus-night" id="busNight" hidden>
+          <svg class="zbus" viewBox="0 0 96 64" width="96" height="64" aria-hidden="true">
+            <g class="zbus-body">
+              <rect x="8" y="18" width="62" height="32" rx="8" fill="var(--accent)"/>
+              <rect x="14" y="24" width="12" height="10" rx="2" fill="var(--bg)"/>
+              <rect x="30" y="24" width="12" height="10" rx="2" fill="var(--bg)"/>
+              <rect x="46" y="24" width="18" height="10" rx="2" fill="var(--bg)"/>
+              <path d="M49 30q3 2.4 6 0M57 30q3 2.4 6 0" stroke="var(--accent)" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+              <circle cx="22" cy="51" r="5" fill="var(--fg2)"/><circle cx="56" cy="51" r="5" fill="var(--fg2)"/>
+              <text x="39" y="45" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="9" font-weight="600" fill="var(--bg)" id="nightLine">4</text>
+            </g>
+            <text class="z z1" x="72" y="22" font-family="Space Grotesk, sans-serif" font-size="10" fill="var(--fg2)">z</text>
+            <text class="z z2" x="79" y="14" font-family="Space Grotesk, sans-serif" font-size="12" fill="var(--fg2)">z</text>
+            <text class="z z3" x="87" y="6" font-family="Space Grotesk, sans-serif" font-size="14" fill="var(--fg2)">Z</text>
+          </svg>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div class="lead">The 4 is asleep</div>
+            <div class="small">Live times back at 06:00</div>
+          </div>
+        </div>
         <div class="line-badge" id="lineBadge">–</div>
-        <div style="display:flex;flex-direction:column;gap:4px">
+        <div style="display:flex;flex-direction:column;gap:4px" id="busDay">
           <div style="display:flex;align-items:baseline;gap:8px"><div class="big" id="busMin" style="color:var(--accent)">--</div><div style="font-size:15px" id="busUnit">min</div><div class="small" id="busNext"></div></div>
           <div class="lead" id="busTo">Bus</div>
           <div class="small" id="busAt">Loading departures…</div>
@@ -464,8 +490,17 @@ async function viaSearch(){
     return { t: base + late * 60000, to: (c.terminal && c.terminal.name) || "", late };
   }).filter(d => d.t);
 }
+const busAsleep = () => new Date().getHours() < 6;
+function showNightBus(on){
+  $("busNight").hidden = !on; $("busDay").hidden = on; $("lineBadge").hidden = on;
+  if (S) $("nightLine").textContent = S.line;
+  const lead = $("busNight").querySelector(".lead");
+  if (S && lead) lead.textContent = "The " + S.line + " is asleep";
+}
 async function loadBus(){
   if (!S) return;
+  if (busAsleep()) { showNightBus(true); return; }
+  showNightBus(false);
   $("lineBadge").textContent = S.line;
   let list = null, errs = [];
   for (const src of [viaOpendata, viaSearch]) {
@@ -484,6 +519,8 @@ async function loadBus(){
   renderBusCountdown();
 }
 function renderBusCountdown(){
+  if (busAsleep()) { if ($("busNight").hidden && S) loadBus(); return; }
+  if (!$("busNight").hidden) { loadBus(); return; }
   const now = Date.now();
   const up = deps.filter(d => d.t > now - 30*1000);
   if (!up.length) { if (deps.length) { $("busMin").textContent = "--"; $("busAt").textContent = "No more line " + S.line + " departures listed"; } return; }
