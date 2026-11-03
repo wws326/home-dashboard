@@ -417,27 +417,34 @@ const lineOf = (d) => String(d.number || d.line || (d.name || "").replace(/^\D+/
 async function getJSON(u){ const r = await fetch(u, { cache: "no-store" }); if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }
 async function viaOpendata(){
   let st = store.get("stop");
-  if (!st || st.q !== S.stopQuery) {
+  if (!st || st.q !== (S.stopFull || S.stopQuery)) {
     st = null;
-    for (const q of [S.stopQuery, "Massagno, " + S.stopQuery, "Lugano, " + S.stopQuery]) {
+    for (const q of [S.stopFull, S.stopQuery].filter(Boolean)) {
       const j = await getJSON("https://transport.opendata.ch/v1/locations?type=station&query=" + encodeURIComponent(q));
-      const hit = (j.stations || []).find(x => x.id && (x.name || "").toLowerCase().includes(S.stopQuery.toLowerCase()));
-      if (hit) { st = { id: hit.id, name: hit.name, q: S.stopQuery }; break; }
+      const list = (j.stations || []).filter(x => x.id);
+      const hit = list.find(x => S.stopFull && x.name === S.stopFull) || list.find(x => (x.name || "").toLowerCase().includes(S.stopQuery.toLowerCase()));
+      if (hit) { st = { id: hit.id, name: hit.name, q: S.stopFull || S.stopQuery }; break; }
     }
     if (!st) throw new Error("stop not found");
     store.set("stop", st);
   }
   const j = await getJSON("https://transport.opendata.ch/v1/stationboard?limit=60&id=" + encodeURIComponent(st.id));
-  return (j.stationboard || []).filter(d => lineOf(d) === String(S.line)).map(d => {
+  const board = j.stationboard || [];
+  const mine = board.filter(d => lineOf(d) === String(S.line) || String(d.name || "").replace(/\s+/g, "") === "B" + S.line);
+  if (!mine.length) throw new Error(st.name + " has lines " + [...new Set(board.map(lineOf))].slice(0, 6).join(", "));
+  return mine.map(d => {
     const s0 = d.stop || {};
     const ts = (s0.prognosis && s0.prognosis.departureTimestamp) || s0.departureTimestamp;
     return { t: ts * 1000, to: d.to || "", late: s0.delay || 0 };
   }).filter(d => d.t);
 }
 async function viaSearch(){
-  const stop = (S.stopFull || ("Massagno, " + S.stopQuery));
-  const j = await getJSON("https://search.ch/timetable/api/stationboard.json?show_delays=1&limit=40&transportation_types=bus&stop=" + encodeURIComponent(stop));
-  return (j.connections || []).filter(c => String(c.line) === String(S.line)).map(c => {
+  const stop = S.stopFull || S.stopQuery;
+  const j = await getJSON("https://search.ch/timetable/api/stationboard.json?show_delays=1&limit=40&stop=" + encodeURIComponent(stop));
+  const conns = j.connections || [];
+  const mine = conns.filter(c => String(c.line) === String(S.line));
+  if (!mine.length) throw new Error(((j.stop && j.stop.name) || stop) + " has lines " + [...new Set(conns.map(c => c.line))].slice(0, 6).join(", "));
+  return mine.map(c => {
     const late = parseInt(String(c.dep_delay || "0").replace("+", ""), 10) || 0;
     const base = new Date(String(c.time).replace(" ", "T")).getTime();
     return { t: base + late * 60000, to: (c.terminal && c.terminal.name) || "", late };
@@ -448,7 +455,7 @@ async function loadBus(){
   $("lineBadge").textContent = S.line;
   let list = null, errs = [];
   for (const src of [viaOpendata, viaSearch]) {
-    try { list = await src(); if (list.length) break; errs.push(src.name.replace("via","") + ": no line " + S.line); }
+    try { list = await src(); if (list.length) break; errs.push(src.name.replace("via","") + ": nothing listed"); }
     catch(e) { errs.push(src.name.replace("via","") + ": " + (e.message || "failed")); if (src === viaOpendata) store.del("stop"); }
   }
   if (list && list.length) {
