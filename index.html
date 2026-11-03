@@ -203,7 +203,7 @@ h3{font-size:13px}
             <text class="z z3" x="87" y="6" font-family="Space Grotesk, sans-serif" font-size="14" fill="var(--fg2)">Z</text>
           </svg>
           <div style="display:flex;flex-direction:column;gap:4px">
-            <div class="lead">The 4 is asleep</div>
+            <div class="lead">Your bus is asleep</div>
             <div class="small">Live times back at 06:00</div>
           </div>
         </div>
@@ -514,7 +514,7 @@ function showNightBus(on){
   $("busNight").hidden = !on; $("busDay").hidden = on; $("lineBadge").hidden = on;
   if (S) $("nightLine").textContent = S.line;
   const lead = $("busNight").querySelector(".lead");
-  if (S && lead) lead.textContent = "The " + S.line + " is asleep";
+  if (lead) lead.textContent = "Your bus is asleep";
 }
 async function loadBus(){
   if (!S) return;
