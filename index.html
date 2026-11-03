@@ -402,11 +402,13 @@ async function loadWeather(){
     const r = await fetch(u, { cache: "no-store" });
     if (!r.ok) throw new Error(r.status);
     const w = await r.json();
-    store.set("wx", w);
+    store.set("wx", w); store.set("wxAt", Date.now());
     renderWeather(w, false);
   } catch(e) {
     const w = store.get("wx");
     if (w) renderWeather(w, true); else $("wxAdvice").textContent = "Weather unavailable";
+    // Usually the Wi-Fi hadn't reconnected yet after waking: try again shortly
+    clearTimeout(loadWeather.retry); loadWeather.retry = setTimeout(loadWeather, 45 * 1000);
   }
 }
 let dayRain = () => 0;
@@ -456,7 +458,7 @@ function renderWeather(w, stale){
     else if (T === 1 && g1 - g0 >= 10) bits.push("windier (" + g1 + " km/h gusts)");
     else if (T === 1 && g0 - g1 >= 10) bits.push("calmer");
   }
-  let note = bits.join(" · ") + (stale ? " · last known" : "");
+  let note = bits.join(" · ") + (stale && store.get("wxAt") ? " · as of " + hm(new Date(store.get("wxAt"))) : "");
   $("wxNote").textContent = note.charAt(0).toUpperCase() + note.slice(1);
   $("wxNote").classList.toggle("stale", stale);
 
@@ -668,7 +670,19 @@ setInterval(loadBus, 60 * 1000);
 setInterval(loadWeather, 20 * 60 * 1000);
 setInterval(loadData, 15 * 60 * 1000);
 // Pick up new versions of the page itself once a night
-setInterval(() => { const n = new Date(); if (n.getHours() === 3 && n.getMinutes() === 0) location.reload(); }, 60 * 1000);
+// Reload by itself when a new version of the page is published
+let pageSig = null;
+const sig = (t) => { let h = 0; for (let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) | 0; return h; };
+async function checkForUpdate(){
+  try {
+    const r = await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" });
+    if (!r.ok) return;
+    const h = sig(await r.text());
+    if (pageSig === null) pageSig = h; else if (h !== pageSig) location.reload();
+  } catch(e) {}
+}
+checkForUpdate();
+setInterval(checkForUpdate, 5 * 60 * 1000);
 </script>
 </body>
 </html>
