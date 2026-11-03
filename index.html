@@ -46,12 +46,14 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px}
 @keyframes breathe{50%{transform:scale(1.07)}}
 @keyframes sway{50%{transform:rotate(-8deg)}}
 @keyframes twinkle{0%,100%{opacity:.25}50%{opacity:1}}
-.controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.seg{display:flex;padding:3px;border-radius:999px;background:var(--card);border:1px solid var(--edge)}
-.seg button{min-height:36px;padding:4px 16px;border:0;border-radius:999px;background:transparent;color:var(--muted);font-size:14px;font-weight:500;cursor:pointer}
-.seg button[aria-pressed="true"]{background:var(--accent);color:var(--bg)}
-.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.sched{font-size:13px;color:var(--muted)}
+.controls{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-left:-8px;opacity:.75}
+.seg{display:flex;align-items:center}
+.seg button,.ctl{min-height:40px;padding:4px 8px;border:0;background:transparent;color:var(--faint);font-size:12px;font-weight:500;letter-spacing:.02em;cursor:pointer;border-radius:8px}
+.seg button[aria-pressed="true"]{color:var(--fg2);text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--accent)}
+.seg button:focus-visible,.ctl:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.ctl[aria-pressed="true"]{color:var(--accent)}
+.sched{font-size:12px;color:var(--faint);padding:0 6px}
+.dot{color:var(--line)}
 .date-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .date{font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .clock-row{display:flex;align-items:baseline;gap:18px;margin-top:6px}
@@ -63,19 +65,20 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px}
 
 .chips{display:flex;gap:14px}
 .chip{display:flex;align-items:center;gap:16px;padding:14px 20px;border-radius:20px;background:var(--card);min-width:290px}
+#wxNote{max-width:300px;line-height:1.4}
 .big{font-family:var(--display);font-size:34px;font-weight:500;line-height:1;font-variant-numeric:tabular-nums}
 .chip .lead{font-size:15px;font-weight:600}
 .small{font-size:12px;color:var(--muted)}
 .line-badge{width:44px;height:44px;border-radius:12px;background:var(--accent);color:var(--bg);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:24px;font-weight:600;flex:none}
 
 main{flex:1;min-height:0;display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:20px}
-.card{background:var(--card);border-radius:22px;padding:22px 24px;display:flex;flex-direction:column;gap:14px;min-height:0;overflow:hidden}
+.card{background:var(--card);border-radius:22px;padding:20px 22px;display:flex;flex-direction:column;gap:14px;min-height:0;overflow:hidden}
 .card-head{display:flex;justify-content:space-between;align-items:baseline}
 h2,h3{margin:0;font-size:15px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 h3{font-size:13px}
 .rule{height:1px;background:var(--line);flex:none}
 
-.day{display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:start;padding:7px 10px;border-radius:10px}
+.day{display:grid;grid-template-columns:56px 1fr;gap:10px;align-items:start;padding:4px 10px;border-radius:9px}
 .day .d{font-size:14px;color:var(--fg2);font-variant-numeric:tabular-nums}
 .day .ev{font-size:14px;color:var(--faint);line-height:1.45}
 .day .ev b{font-weight:500;color:var(--fg)}
@@ -83,8 +86,8 @@ h3{font-size:13px}
 .day.past{opacity:.5}
 .day.today{background:var(--accent-soft);outline:1px solid var(--accent)}
 .day.today .d{color:var(--accent);font-weight:600}
-.upcoming{display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--fg2);overflow:hidden}
-.upcoming .u{display:grid;grid-template-columns:64px 1fr;gap:12px}
+.upcoming{flex:1;min-height:0;display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--fg2);overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+.upcoming .u{display:grid;grid-template-columns:56px 1fr;gap:10px}
 .upcoming .u span:first-child{color:var(--muted);font-variant-numeric:tabular-nums}
 
 .todo{display:flex;gap:14px;align-items:flex-start;width:100%;min-height:48px;padding:8px 0;border:0;background:none;text-align:left;font-size:16px;line-height:1.4;cursor:pointer;color:var(--fg)}
@@ -151,11 +154,10 @@ h3{font-size:13px}
       </div>
       <div class="controls">
         <div class="seg" role="group" aria-label="Today is">
-          <button type="button" id="segOffice" aria-pressed="false">Office day</button>
-          <button type="button" id="segWfh" aria-pressed="false">Home day</button>
+          <button type="button" id="segOffice" aria-pressed="false">Office</button><span class="dot" aria-hidden="true">/</span><button type="button" id="segWfh" aria-pressed="false">Home</button>
         </div>
         <span class="sched" id="schedNote"></span>
-        <button type="button" class="pill" id="stayBtn" aria-pressed="false">Keep on 1 hr</button>
+        <button type="button" class="ctl" id="stayBtn" aria-pressed="false">Keep on 1 hr</button>
       </div>
     </div>
     <div class="chips">
@@ -356,7 +358,7 @@ async function loadWeather(){
   if (!S) return;
   const u = "https://api.open-meteo.com/v1/forecast?latitude=" + S.lat + "&longitude=" + S.lon +
     "&current=temperature_2m,weather_code&hourly=precipitation_probability,apparent_temperature" +
-    "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" +
+    "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,apparent_temperature_max,apparent_temperature_min,wind_gusts_10m_max,precipitation_sum" +
     "&timezone=" + encodeURIComponent(CFG.tz) + "&forecast_days=7";
   try {
     const r = await fetch(u, { cache: "no-store" });
@@ -375,30 +377,42 @@ function renderWeather(w, stale){
   $("wxNow").textContent = Math.round(w.current.temperature_2m) + "°";
   $("wxHL").textContent = "H " + Math.round(w.daily.temperature_2m_max[0]) + "° L " + Math.round(w.daily.temperature_2m_min[0]) + "°";
 
-  // Advice from commute hours today (or tomorrow once today's commute is over)
-  const now = new Date();
+  // Tomorrow's commute, compared with today
   const pick = (dayIdx) => {
     const date = w.daily.time[dayIdx];
-    let rain = 0, feels = 99, rainAt = "";
+    let rain = 0, rainAt = "";
     w.hourly.time.forEach((t, i) => {
       if (!t.startsWith(date)) return;
       const h = +t.slice(11, 13);
       if (S.commute.some(([a,b]) => h >= a && h < b)) {
         const pp = w.hourly.precipitation_probability[i] ?? 0;
         if (pp > rain) { rain = pp; rainAt = t.slice(11, 16); }
-        feels = Math.min(feels, w.hourly.apparent_temperature[i] ?? 99);
       }
     });
-    return { rain, feels, rainAt };
+    return { rain, rainAt };
   };
-  const forTomorrow = now.getHours() >= 19;
-  const a = pick(forTomorrow ? 1 : 0);
+  const D = w.daily, T = 1, N = 0;
+  const a = pick(T);
   const wet = a.rain >= S.umbrellaPct;
-  $("wxAdvice").textContent = (forTomorrow ? "Tomorrow: " : "") + (wet ? "Take an umbrella" : "No umbrella needed");
+  $("wxAdvice").textContent = "Tomorrow: " + (wet ? "take an umbrella" : "no umbrella needed");
   $("wxAdvice").style.color = wet ? "var(--rain)" : "var(--accent)";
-  let note = label + (a.rain >= S.umbrellaPct ? " · " + a.rain + "% around " + a.rainAt : "") + (stale ? " · last known" : "");
-  if (!forTomorrow && a.rain < S.umbrellaPct && (w.daily.precipitation_probability_max[1] ?? 0) >= S.umbrellaPct) note = label + " · rain likely tomorrow";
-  $("wxNote").textContent = note;
+  const bits = [];
+  const [, tLabel] = wxKind(D.weather_code[T]);
+  bits.push(tLabel + ", " + Math.round(D.temperature_2m_max[T]) + "° / " + Math.round(D.temperature_2m_min[T]) + "°");
+  if (wet) bits.push(a.rain + "% chance of rain around " + a.rainAt + ((D.precipitation_sum && D.precipitation_sum[T] >= 1) ? ", about " + Math.round(D.precipitation_sum[T]) + " mm" : ""));
+  else bits.push("dry for your commute");
+  if (D.apparent_temperature_max) {
+    const d = Math.round(D.apparent_temperature_max[T] - D.apparent_temperature_max[N]);
+    bits.push(d <= -2 ? "feels " + (-d) + "° colder than today" : d >= 2 ? "feels " + d + "° milder than today" : "feels about the same as today");
+  }
+  if (D.wind_gusts_10m_max) {
+    const g1 = Math.round(D.wind_gusts_10m_max[T]), g0 = Math.round(D.wind_gusts_10m_max[N]);
+    if (g1 >= 45) bits.push("strong gusts up to " + g1 + " km/h");
+    else if (g1 - g0 >= 10) bits.push("windier, gusts to " + g1 + " km/h");
+    else if (g0 - g1 >= 10) bits.push("calmer than today");
+  }
+  let note = bits.join(" · ") + (stale ? " · last known" : "");
+  $("wxNote").textContent = note.charAt(0).toUpperCase() + note.slice(1);
   $("wxNote").classList.toggle("stale", stale);
 
   $("fc").innerHTML = w.daily.time.map((d, i) => {
@@ -568,7 +582,7 @@ function renderData(d, stale){
   const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
   $("weekRange").textContent = mon.getDate() + " – " + sun.getDate() + " " + MON[sun.getMonth()].slice(0,3);
   const weekEnd = ymd(sun);
-  const later = (d.events || []).filter(e => e.date > weekEnd && !e.routine).slice(0, 6);
+  const later = (d.events || []).filter(e => e.date > weekEnd && !e.routine).slice(0, 12);
   $("upcoming").innerHTML = later.length
     ? later.map(e => { const dt = new Date(e.date + "T12:00:00"); return '<div class="u"><span>' + DOW[dt.getDay()] + " " + dt.getDate() + '</span><span' + (e.birthday ? ' class="bday"' : "") + ">" + esc(e.title) + "</span></div>"; }).join("")
     : '<div class="empty">Nothing booked yet.</div>';
