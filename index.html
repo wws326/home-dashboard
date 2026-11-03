@@ -31,13 +31,33 @@ button{font:inherit;color:inherit}
 #app{height:100%;display:flex;flex-direction:column;gap:2.2vh;
   padding:max(3.4vh,env(safe-area-inset-top)) max(2.7vw,env(safe-area-inset-right)) max(3.4vh,env(safe-area-inset-bottom)) max(2.7vw,env(safe-area-inset-left))}
 
-header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.hello{display:flex;flex-direction:column;gap:14px;min-width:0}
+.greet-row{display:flex;align-items:center;gap:16px}
+.greet{margin:0;font-family:var(--display);font-size:46px;font-weight:500;line-height:1.05;letter-spacing:-.015em;text-wrap:balance}
+.sky{width:64px;height:64px;flex:none}
+.sky svg{width:100%;height:100%;overflow:visible}
+.sky .rays{transform-origin:32px 32px;animation:spin 28s linear infinite}
+.sky .core{transform-origin:32px 32px;animation:breathe 5s ease-in-out infinite}
+.sky .moon{transform-origin:32px 32px;animation:sway 7s ease-in-out infinite}
+.sky .star{animation:twinkle 3.2s ease-in-out infinite}
+.sky .star:nth-of-type(2){animation-delay:1.1s}.sky .star:nth-of-type(3){animation-delay:2.2s}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes breathe{50%{transform:scale(1.07)}}
+@keyframes sway{50%{transform:rotate(-8deg)}}
+@keyframes twinkle{0%,100%{opacity:.25}50%{opacity:1}}
+.controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.seg{display:flex;padding:3px;border-radius:999px;background:var(--card);border:1px solid var(--edge)}
+.seg button{min-height:36px;padding:4px 16px;border:0;border-radius:999px;background:transparent;color:var(--muted);font-size:14px;font-weight:500;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--bg)}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sched{font-size:13px;color:var(--muted)}
 .date-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .date{font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .clock-row{display:flex;align-items:baseline;gap:18px;margin-top:6px}
 .clock{font-family:var(--display);font-size:72px;font-weight:500;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .greet{font-size:18px;color:var(--fg2)}
-.pill{min-height:34px;padding:4px 14px;border-radius:999px;border:1px solid var(--edge);background:var(--card);color:var(--fg2);font-size:13px;font-weight:500;cursor:pointer}
+.pill{min-height:40px;padding:4px 14px;border-radius:999px;border:1px solid var(--edge);background:var(--card);color:var(--fg2);font-size:13px;font-weight:500;cursor:pointer}
 .pill[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
 .pill:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
@@ -67,8 +87,14 @@ h3{font-size:13px}
 .upcoming .u{display:grid;grid-template-columns:64px 1fr;gap:12px}
 .upcoming .u span:first-child{color:var(--muted);font-variant-numeric:tabular-nums}
 
-.todo{display:flex;gap:14px;align-items:flex-start;padding:6px 0;font-size:16px;line-height:1.4}
-.box{width:20px;height:20px;border:1.6px solid var(--accent);border-radius:6px;flex:none;margin-top:2px}
+.todo{display:flex;gap:14px;align-items:flex-start;width:100%;min-height:48px;padding:8px 0;border:0;background:none;text-align:left;font-size:16px;line-height:1.4;cursor:pointer;color:var(--fg)}
+.todo:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+.box{width:24px;height:24px;border:1.6px solid var(--accent);border-radius:7px;flex:none;margin-top:0;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.todo[aria-pressed="true"] .box{background:var(--accent)}
+.todo[aria-pressed="true"] .box svg{opacity:1}
+.box svg{opacity:0;transition:opacity .2s}
+.todo[aria-pressed="true"] .tt2{color:var(--faint);text-decoration:line-through}
+.bday{color:var(--warm)}
 .watch{display:flex;gap:12px;align-items:flex-start;font-size:15px;line-height:1.4}
 .watch .note{color:var(--muted)}
 .foot{margin-top:auto;font-size:12px;color:var(--faint)}
@@ -112,21 +138,24 @@ h3{font-size:13px}
   .forecast{grid-template-columns:repeat(4,minmax(0,1fr))}
   .forecast>div:first-child{grid-column:1/-1}
 }
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
 <div id="app">
   <header>
-    <div>
-      <div class="date-row">
-        <div class="date" id="date">—</div>
-        <button type="button" class="pill" id="modeBtn">—</button>
-        <button type="button" class="pill" id="stayBtn" aria-pressed="false">Stay on 1 hr</button>
+    <div class="hello">
+      <div class="greet-row">
+        <div class="sky" id="sky" aria-hidden="true"></div>
+        <h1 class="greet" id="greet">Hello</h1>
       </div>
-      <div class="clock-row">
-        <div class="clock" id="clock">--:--</div>
-        <div class="greet" id="greet"></div>
+      <div class="controls">
+        <div class="seg" role="group" aria-label="Today is">
+          <button type="button" id="segOffice" aria-pressed="false">Office day</button>
+          <button type="button" id="segWfh" aria-pressed="false">Home day</button>
+        </div>
+        <span class="sched" id="schedNote"></span>
+        <button type="button" class="pill" id="stayBtn" aria-pressed="false">Keep on 1 hr</button>
       </div>
     </div>
     <div class="chips">
@@ -134,7 +163,7 @@ h3{font-size:13px}
         <div id="wxIcon" aria-hidden="true"></div>
         <div style="display:flex;flex-direction:column;gap:4px">
           <div style="display:flex;align-items:baseline;gap:10px"><div class="big" id="wxNow">--°</div><div class="small" id="wxHL"></div></div>
-          <div class="lead" id="wxAdvice" style="color:var(--warm)">Loading weather…</div>
+          <div class="lead" id="wxAdvice">Loading weather…</div>
           <div class="small" id="wxNote"></div>
         </div>
       </div>
@@ -228,12 +257,29 @@ function scheduledOn(now){
 function awakeUntil(){ return store.get("awakeUntil") || 0; }
 function isOn(now){ return scheduledOn(now) || now.getTime() < awakeUntil(); }
 
-$("modeBtn").addEventListener("click", () => {
+function defaultMode(now){ return S && S.wfhDays.includes(now.getDay()) ? "wfh" : "office"; }
+function setMode(mode){
   const now = new Date();
-  const next = dayMode(now) === "wfh" ? "office" : "wfh";
-  store.set("override", { date: ymd(now), mode: next });
+  if (mode === defaultMode(now)) store.del("override"); else store.set("override", { date: ymd(now), mode });
   tick();
-});
+}
+$("segOffice").addEventListener("click", () => setMode("office"));
+$("segWfh").addEventListener("click", () => setMode("wfh"));
+const fmtMin = (m) => pad(Math.floor(m/60) % 24) + ":" + pad(m % 60);
+function scheduleNote(now){
+  if (!S) return "";
+  const wins = dayMode(now) === "wfh" ? S.onWfh : S.onOffice;
+  const gaps = [];
+  for (let i = 0; i + 1 < wins.length; i++) gaps.push(fmtMin(wins[i][1]) + "–" + fmtMin(wins[i+1][0]));
+  const end = wins[wins.length-1][1];
+  return gaps.length ? "Screen sleeps " + gaps.join(", ") : "Screen on until " + (end >= 1440 ? "midnight" : fmtMin(end));
+}
+const SKY = {
+  sun: '<svg viewBox="0 0 64 64"><g class="rays" stroke="#E6B566" stroke-width="2.4" stroke-linecap="round"><path d="M32 4v8M32 52v8M4 32h8M52 32h8M12.2 12.2l5.6 5.6M46.2 46.2l5.6 5.6M12.2 51.8l5.6-5.6M46.2 17.8l5.6-5.6"/></g><circle class="core" cx="32" cy="32" r="12" fill="#E6B566"/></svg>',
+  dusk: '<svg viewBox="0 0 64 64"><g class="rays" stroke="#E6B566" stroke-width="2.4" stroke-linecap="round" opacity=".7"><path d="M32 8v6M10 32h6M48 32h6M16.4 16.4l4.2 4.2M43.4 20.6l4.2-4.2"/></g><circle class="core" cx="32" cy="36" r="11" fill="#E6B566"/><path d="M6 44h52" stroke="#9BA7A3" stroke-width="2.4" stroke-linecap="round"/><rect x="0" y="45" width="64" height="19" fill="var(--bg)"/></svg>',
+  moon: '<svg viewBox="0 0 64 64"><path class="moon" d="M40 10a22 22 0 1 0 14 34A18 18 0 0 1 40 10z" fill="#E9EDEB"/><circle class="star" cx="12" cy="14" r="2" fill="#8FB7E6"/><circle class="star" cx="54" cy="10" r="1.6" fill="#8FB7E6"/><circle class="star" cx="8" cy="40" r="1.4" fill="#8FB7E6"/></svg>'
+};
+let skyPhase = "";
 $("stayBtn").addEventListener("click", () => {
   const until = awakeUntil() > Date.now() + 2*60*1000 ? 0 : Date.now() + 60*60*1000;
   store.set("awakeUntil", until);
@@ -264,16 +310,18 @@ function tick(){
   const on = isOn(now);
   $("sleep").hidden = on;
   holdWake(on);
-  $("clock").textContent = hm(now);
-  $("date").textContent = DOWL[now.getDay()] + " · " + now.getDate() + " " + MON[now.getMonth()] + " " + now.getFullYear();
   const h = now.getHours();
   const nm = S && S.name ? ", " + S.name : "";
   $("greet").textContent = (h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening") + nm;
   const mode = dayMode(now);
-  $("modeBtn").textContent = mode === "wfh" ? "WFH day · switch to office" : "Office day · switch to WFH";
+  $("segOffice").setAttribute("aria-pressed", mode === "office" ? "true" : "false");
+  $("segWfh").setAttribute("aria-pressed", mode === "wfh" ? "true" : "false");
+  $("schedNote").textContent = scheduleNote(now);
+  const phase = h >= 6 && h < 17 ? "sun" : h >= 17 && h < 19 ? "dusk" : "moon";
+  if (phase !== skyPhase) { $("sky").innerHTML = SKY[phase]; skyPhase = phase; }
   const stay = awakeUntil() > now.getTime() + 2*60*1000;
   $("stayBtn").setAttribute("aria-pressed", stay ? "true" : "false");
-  $("stayBtn").textContent = stay ? "On until " + hm(new Date(awakeUntil())) + " · cancel" : "Stay on 1 hr";
+  $("stayBtn").textContent = stay ? "On until " + hm(new Date(awakeUntil())) + " · cancel" : "Keep on 1 hr";
   if (!on) {
     const c = $("sleepClock"); c.textContent = hm(now);
     const k = now.getHours()*60 + now.getMinutes();
@@ -331,23 +379,24 @@ function renderWeather(w, stale){
   const now = new Date();
   const pick = (dayIdx) => {
     const date = w.daily.time[dayIdx];
-    let rain = 0, feels = 99;
+    let rain = 0, feels = 99, rainAt = "";
     w.hourly.time.forEach((t, i) => {
       if (!t.startsWith(date)) return;
       const h = +t.slice(11, 13);
       if (S.commute.some(([a,b]) => h >= a && h < b)) {
-        rain = Math.max(rain, w.hourly.precipitation_probability[i] ?? 0);
+        const pp = w.hourly.precipitation_probability[i] ?? 0;
+        if (pp > rain) { rain = pp; rainAt = t.slice(11, 16); }
         feels = Math.min(feels, w.hourly.apparent_temperature[i] ?? 99);
       }
     });
-    return { rain, feels };
+    return { rain, feels, rainAt };
   };
   const forTomorrow = now.getHours() >= 19;
   const a = pick(forTomorrow ? 1 : 0);
-  const wear = a.feels < S.coatC ? "Warm coat" : a.feels < S.jacketC ? "Jacket on" : "No jacket needed";
-  const brolly = a.rain >= S.umbrellaPct ? "take an umbrella" : "no umbrella";
-  $("wxAdvice").textContent = (forTomorrow ? "Tomorrow: " : "") + wear + " · " + brolly;
-  let note = label + (stale ? " · last known" : "");
+  const wet = a.rain >= S.umbrellaPct;
+  $("wxAdvice").textContent = (forTomorrow ? "Tomorrow: " : "") + (wet ? "Take an umbrella" : "No umbrella needed");
+  $("wxAdvice").style.color = wet ? "var(--rain)" : "var(--accent)";
+  let note = label + (a.rain >= S.umbrellaPct ? " · " + a.rain + "% around " + a.rainAt : "") + (stale ? " · last known" : "");
   if (!forTomorrow && a.rain < S.umbrellaPct && (w.daily.precipitation_probability_max[1] ?? 0) >= S.umbrellaPct) note = label + " · rain likely tomorrow";
   $("wxNote").textContent = note;
   $("wxNote").classList.toggle("stale", stale);
@@ -362,45 +411,54 @@ function renderWeather(w, stale){
   }).join("");
 }
 
-/* ---------- Bus (transport.opendata.ch, no key) ---------- */
+/* ---------- Bus: transport.opendata.ch, falling back to search.ch ---------- */
 let deps = [];
-async function stopId(){
-  const cached = store.get("stop");
-  if (cached && cached.q === S.stopQuery) return cached;
-  const r = await fetch("https://transport.opendata.ch/v1/locations?type=station&query=" + encodeURIComponent(S.stopQuery) +
-    "&x=" + S.lat + "&y=" + S.lon);
-  const j = await r.json();
-  const want = S.stopQuery.toLowerCase();
-  const st = (j.stations || []).find(s => s.id && (s.name || "").toLowerCase().includes(want));
-  if (!st) throw new Error("stop not found");
-  const v = { id: st.id, name: st.name, q: S.stopQuery };
-  store.set("stop", v);
-  return v;
+const lineOf = (d) => String(d.number || d.line || (d.name || "").replace(/^\D+/, "") || "").trim();
+async function getJSON(u){ const r = await fetch(u, { cache: "no-store" }); if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }
+async function viaOpendata(){
+  let st = store.get("stop");
+  if (!st || st.q !== S.stopQuery) {
+    st = null;
+    for (const q of [S.stopQuery, "Massagno, " + S.stopQuery, "Lugano, " + S.stopQuery]) {
+      const j = await getJSON("https://transport.opendata.ch/v1/locations?type=station&query=" + encodeURIComponent(q));
+      const hit = (j.stations || []).find(x => x.id && (x.name || "").toLowerCase().includes(S.stopQuery.toLowerCase()));
+      if (hit) { st = { id: hit.id, name: hit.name, q: S.stopQuery }; break; }
+    }
+    if (!st) throw new Error("stop not found");
+    store.set("stop", st);
+  }
+  const j = await getJSON("https://transport.opendata.ch/v1/stationboard?limit=60&id=" + encodeURIComponent(st.id));
+  return (j.stationboard || []).filter(d => lineOf(d) === String(S.line)).map(d => {
+    const s0 = d.stop || {};
+    const ts = (s0.prognosis && s0.prognosis.departureTimestamp) || s0.departureTimestamp;
+    return { t: ts * 1000, to: d.to || "", late: s0.delay || 0 };
+  }).filter(d => d.t);
+}
+async function viaSearch(){
+  const stop = (S.stopFull || ("Massagno, " + S.stopQuery));
+  const j = await getJSON("https://search.ch/timetable/api/stationboard.json?show_delays=1&limit=40&transportation_types=bus&stop=" + encodeURIComponent(stop));
+  return (j.connections || []).filter(c => String(c.line) === String(S.line)).map(c => {
+    const late = parseInt(String(c.dep_delay || "0").replace("+", ""), 10) || 0;
+    const base = new Date(String(c.time).replace(" ", "T")).getTime();
+    return { t: base + late * 60000, to: (c.terminal && c.terminal.name) || "", late };
+  }).filter(d => d.t);
 }
 async function loadBus(){
   if (!S) return;
   $("lineBadge").textContent = S.line;
-  try {
-    const st = await stopId();
-    const r = await fetch("https://transport.opendata.ch/v1/stationboard?limit=40&id=" + encodeURIComponent(st.id), { cache: "no-store" });
-    if (!r.ok) throw new Error(r.status);
-    const j = await r.json();
-    deps = (j.stationboard || [])
-      .filter(d => String(d.number) === String(S.line))
-      .map(d => {
-        const s = d.stop || {};
-        const ts = (s.prognosis && s.prognosis.departureTimestamp) || s.departureTimestamp;
-        return { t: ts * 1000, to: d.to, late: s.delay || 0 };
-      })
-      .filter(d => d.t);
-    // Prefer the direction towards the station when both directions stop here
-    const toward = S.towards ? deps.filter(d => (d.to || "").toLowerCase().includes(S.towards.toLowerCase())) : [];
-    if (toward.length) deps = toward;
+  let list = null, errs = [];
+  for (const src of [viaOpendata, viaSearch]) {
+    try { list = await src(); if (list.length) break; errs.push(src.name.replace("via","") + ": no line " + S.line); }
+    catch(e) { errs.push(src.name.replace("via","") + ": " + (e.message || "failed")); if (src === viaOpendata) store.del("stop"); }
+  }
+  if (list && list.length) {
+    const toward = S.towards ? list.filter(d => d.to.toLowerCase().includes(S.towards.toLowerCase())) : [];
+    deps = (toward.length ? toward : list).sort((a, b) => a.t - b.t);
     store.set("deps", deps);
-    $("busTo").textContent = st.name.replace(/^.*?,\s*/, "") + " → " + (deps[0] ? deps[0].to.replace(/^[^,]+,\s*/, "") : "line " + S.line);
-  } catch(e) {
-    deps = store.get("deps") || [];
-    if (!deps.length) { $("busAt").textContent = "Departures unavailable"; }
+    $("busTo").textContent = (S.stopLabel || S.stopQuery) + " → " + deps[0].to.replace(/^[^,]+,\s*/, "");
+  } else {
+    deps = (store.get("deps") || []).filter(d => d.t > Date.now());
+    if (!deps.length) { $("busMin").textContent = "--"; $("busNext").textContent = ""; $("busAt").textContent = "Can't load departures (" + errs.join("; ") + ")"; return; }
   }
   renderBusCountdown();
 }
@@ -458,6 +516,26 @@ $("unlockForm").addEventListener("submit", async (ev) => {
   }
 });
 
+/* Ticks are kept on this iPad. A ticked item shows struck through today and is hidden from tomorrow. */
+let lastTodos = [];
+function renderTodos(todos){
+  lastTodos = todos;
+  const done = store.get("done") || {};
+  const today = ymd(new Date());
+  const visible = todos.filter(t => !done[t.title] || done[t.title] === today);
+  const check = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  $("todos").innerHTML = visible.length ? visible.map((t, i) =>
+    '<button type="button" class="todo" data-i="' + i + '" aria-pressed="' + (done[t.title] ? "true" : "false") + '"><span class="box" aria-hidden="true">' + check + '</span><span class="tt2">' + esc(t.title) + "</span></button>").join("")
+    : '<div class="empty">All clear.</div>';
+  $("todos").querySelectorAll(".todo").forEach(b => b.addEventListener("click", () => {
+    const t = visible[+b.dataset.i]; const dn = store.get("done") || {};
+    if (dn[t.title]) delete dn[t.title]; else dn[t.title] = ymd(new Date());
+    store.set("done", dn); renderTodos(lastTodos);
+  }));
+  const open = visible.filter(t => !done[t.title]).length;
+  $("todoCount").textContent = open + " open";
+}
+
 function renderData(d, stale){
   if (d.settings) {
     const first = !S || JSON.stringify(S) !== JSON.stringify(d.settings);
@@ -475,7 +553,7 @@ function renderData(d, stale){
     const key = ymd(dt);
     const evs = byDay[key] || [];
     const txt = evs.length
-      ? evs.map(e => e.routine ? '<span class="routine">' + esc((e.time ? e.time + " " : "") + e.title) + "</span>" : "<b>" + esc(e.time ? e.time + " " : "") + "</b>" + esc(e.title)).join("<br>")
+      ? evs.map(e => e.birthday ? '<span class="bday">' + esc(e.title) + "</span>" : e.routine ? '<span class="routine">' + esc((e.time ? e.time + " " : "") + e.title) + "</span>" : "<b>" + esc(e.time ? e.time + " " : "") + "</b>" + esc(e.title)).join("<br>")
       : (key === today ? "Nothing scheduled" : "Free");
     rows.push('<div class="day' + (key === today ? " today" : key < today ? " past" : "") + '"><div class="d">' + DOW[dt.getDay()] + " " + dt.getDate() + '</div><div class="ev">' + txt + "</div></div>");
   }
@@ -485,12 +563,10 @@ function renderData(d, stale){
   const weekEnd = ymd(sun);
   const later = (d.events || []).filter(e => e.date > weekEnd && !e.routine).slice(0, 6);
   $("upcoming").innerHTML = later.length
-    ? later.map(e => { const dt = new Date(e.date + "T12:00:00"); return '<div class="u"><span>' + DOW[dt.getDay()] + " " + dt.getDate() + "</span><span>" + esc(e.title) + "</span></div>"; }).join("")
+    ? later.map(e => { const dt = new Date(e.date + "T12:00:00"); return '<div class="u"><span>' + DOW[dt.getDay()] + " " + dt.getDate() + '</span><span' + (e.birthday ? ' class="bday"' : "") + ">" + esc(e.title) + "</span></div>"; }).join("")
     : '<div class="empty">Nothing booked yet.</div>';
 
-  const todos = d.todos || [];
-  $("todos").innerHTML = todos.length ? todos.map(t => '<div class="todo"><span class="box" aria-hidden="true"></span><span>' + esc(t.title) + "</span></div>").join("") : '<div class="empty">All clear.</div>';
-  $("todoCount").textContent = todos.length + " open";
+  renderTodos(d.todos || []);
   const eye = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E6B566" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" style="flex:none;margin-top:1px"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
   $("watching").innerHTML = (d.watching || []).map(w => '<div class="watch">' + eye + "<div>" + esc(w.title) + (w.note ? ' <span class="note">· ' + esc(w.note) + "</span>" : "") + "</div></div>").join("") || '<div class="empty">Nothing on watch.</div>';
 
